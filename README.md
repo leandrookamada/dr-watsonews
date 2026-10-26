@@ -6,6 +6,8 @@ Dr. Watsonews é um briefing diário de notícias com checagem de fatos, que rod
 
 O resultado são notas em um cofre [Obsidian](https://obsidian.md) (uma por notícia, com veredito, evidências e red flags) e uma página de jornal em HTML para ler no navegador.
 
+**As notícias publicadas ficam em outro repositório: [O Giro do Watson](https://github.com/leandrookamada/giro-do-watson).** Este aqui guarda só o código e o método.
+
 ## Inspiração e créditos
 
 A ideia vem do [frank_investigator](https://github.com/akitaonrails/frank_investigator), de akitaonrails: extrair alegações, seguir citações até a fonte primária, classificar a autoridade das fontes, tratar veículos do mesmo grupo editorial como uma voz só, caçar manipulação e decidir por consenso.
@@ -28,7 +30,7 @@ Lestrade (Haiku)             tria, agrupa, remove repetidas, marca risco: baixo 
 Consenso (sessão principal)  aplica as regras e define veredito + confiança
         |
         v
-cofre/                       vault Obsidian: notícias + nota de edição do dia
+<cofre>                      vault Obsidian: notícias + nota de edição do dia
         |
         v
 scripts/jornal.mjs  -->  jornal/index.html
@@ -102,15 +104,34 @@ node scripts/coletar.mjs --check
 node scripts/jornal.mjs --check
 ```
 
-Para ler o resultado, abra a pasta `cofre/` como vault no Obsidian e o arquivo `jornal/index.html` no navegador. A página é um arquivo único, com busca, navegação por área, tags e arquivo de edições, e tema claro/escuro.
+Para ler o resultado, abra a pasta do cofre como vault no Obsidian e o arquivo `jornal/index.html` no navegador. A página é um arquivo único, com busca, navegação por área, tags e arquivo de edições, e tema claro/escuro.
+
+### Onde fica o cofre
+
+Por padrão, o cofre é a pasta `cofre/` dentro do projeto (fora do Git). Para gravar direto num vault seu do Obsidian, crie `config.local.json` na raiz:
+
+```json
+{ "cofre": "C:\\caminho\\para\\seu\\vault" }
+```
+
+Com o cofre fora do projeto, libere a escrita nele para o Claude Code em `.claude/settings.local.json` (também fora do Git). No Windows, `C:\Users\...` vira `//c/Users/...`:
+
+```json
+{
+  "permissions": {
+    "allow": ["Edit(//c/caminho/para/seu/vault/**)"],
+    "additionalDirectories": ["C:/caminho/para/seu/vault"]
+  }
+}
+```
 
 ### Dossiês
 
-Além do briefing diário, dá para pedir ao Claude Code uma pesquisa direcionada sobre um tema (por exemplo, uma CVE). Ela segue o mesmo método: frentes de Watson em paralelo para fontes primárias, exploração e ecossistema, e depois o Mycroft revisa as alegações consolidadas. O resultado vai para `cofre/dossies/AAAA-MM-DD-<tema>.md` e aparece na aba Dossiês do jornal.
+Além do briefing diário, dá para pedir ao Claude Code uma pesquisa direcionada sobre um tema (por exemplo, uma CVE). Ela segue o mesmo método: frentes de Watson em paralelo para fontes primárias, exploração e ecossistema, e depois o Mycroft revisa as alegações consolidadas. O resultado vai para `<cofre>/dossies/AAAA-MM-DD-<tema>.md` e aparece na aba Dossiês do jornal.
 
 ### Formato das notas
 
-Cada notícia em `cofre/noticias/AAAA-MM-DD-<slug>.md` tem frontmatter (`titulo`, `data`, `area`, `secao`, `veredito`, `confianca`, `contestado`, `checagem`, `tags`), um resumo só com o que foi verificado, "Por que importa", links de evidência e red flags. A nota de edição do dia, em `cofre/edicoes/`, traz os destaques, a lista por seção e a tabela de descartados.
+Cada notícia em `<cofre>/noticias/AAAA-MM-DD-<slug>.md` tem frontmatter (`titulo`, `data`, `area`, `secao`, `veredito`, `confianca`, `contestado`, `checagem`, `tags`), um resumo só com o que foi verificado, "Por que importa", links de evidência e red flags. A nota de edição do dia, em `<cofre>/edicoes/`, traz os destaques, a lista por seção e a tabela de descartados.
 
 ## Estrutura
 
@@ -123,9 +144,7 @@ areas/                         uma área por arquivo: escopo, checagens extras, 
 scripts/coletar.mjs            coleta dos feeds (Node, sem dependências)
 scripts/jornal.mjs             gera o jornal a partir do cofre (Node, sem dependências)
 jornal/template.html           visual do jornal (jornal/index.html é gerado)
-cofre/noticias/                uma nota por notícia
-cofre/edicoes/                 uma nota por dia e área
-cofre/dossies/                 pesquisas direcionadas sobre um tema (aba Dossiês no jornal)
+config.local.json              caminho do cofre na sua máquina (fora do Git)
 ```
 
 `coleta/` (saída intermediária da coleta) e `jornal/index.html` são gerados e ficam fora do Git.
@@ -142,9 +161,9 @@ cofre/dossies/                 pesquisas direcionadas sobre um tema (aba Dossiê
 
 Todo conteúdo buscado na web (artigos, feeds, comentários) é tratado como **dado, não instrução**. Páginas que tentam dar ordens aos agentes são ignoradas e registradas como red flag da fonte.
 
-As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita em `cofre/` e execução dos dois scripts do projeto. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
+As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita no cofre e execução dos dois scripts do projeto. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
 
-Durante uma execução, o pipeline só escreve dentro de `cofre/` (e, pelos scripts, em `coleta/` e `jornal/`).
+Durante uma execução, o pipeline só escreve dentro do cofre (e, pelos scripts, em `coleta/` e `jornal/`).
 
 ## Licença
 

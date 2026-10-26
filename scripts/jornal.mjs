@@ -1,4 +1,4 @@
-// Gera jornal/index.html a partir das notas do cofre Obsidian (cofre/noticias, cofre/edicoes e cofre/dossies).
+// Gera jornal/index.html a partir das notas do cofre Obsidian (<cofre>/noticias, <cofre>/edicoes e <cofre>/dossies).
 // Uso: node scripts/jornal.mjs   |   node scripts/jornal.mjs --check (só valida o parser)
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
@@ -7,6 +7,9 @@ import assert from 'node:assert/strict';
 
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
 const caminho = (...p) => join(RAIZ, ...p);
+// Caminho do cofre: campo "cofre" de config.local.json (fora do git); sem ele, cofre/ dentro do projeto.
+const CONFIG = join(RAIZ, 'config.local.json');
+const COFRE = existsSync(CONFIG) ? JSON.parse(readFileSync(CONFIG, 'utf8')).cofre : join(RAIZ, 'cofre');
 
 // Frontmatter só no subconjunto que o pipeline escreve: `chave: valor` e listas `[a, b]`.
 export function parseNota(texto) {
@@ -30,7 +33,7 @@ export function parseNota(texto) {
 }
 
 function lerPasta(pasta) {
-  const dir = caminho('cofre', pasta);
+  const dir = join(COFRE, pasta);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter(f => f.endsWith('.md'))

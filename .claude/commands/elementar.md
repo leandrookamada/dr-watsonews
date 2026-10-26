@@ -8,12 +8,12 @@ Gere o briefing de hoje.
 - Área: `$0` (se vazio, `tech`). O arquivo da área é `areas/<área>.md`; se não existir, pare e liste as áreas disponíveis em `areas/`.
 - Limite de histórias verificadas: `$1` (se vazio, 12).
 
-Leia `CLAUDE.md` e o arquivo da área antes de começar. Siga as etapas na ordem.
+Leia `CLAUDE.md` e o arquivo da área antes de começar. O **cofre** é a pasta do campo `cofre` em `config.local.json`; se esse arquivo não existir, é `cofre/` no projeto. Abaixo, `<cofre>` é esse caminho. Siga as etapas na ordem.
 
 ## 1. Coleta e triagem — script + Lestrade
 
 1. Rode `node scripts/coletar.mjs <área>`. Ele baixa os feeds da área sem gastar tokens e grava `coleta/<área>.md`. Não leia esse arquivo na sessão principal: ele é para o Lestrade.
-2. Chame o subagente **lestrade** passando: a data de hoje, o caminho do arquivo da área, o caminho `coleta/<área>.md`, os títulos (campo `titulo`) das notas de `cofre/noticias/` da área nos últimos 7 dias e o limite de histórias.
+2. Chame o subagente **lestrade** passando: a data de hoje, o caminho do arquivo da área, o caminho `coleta/<área>.md`, os títulos (campo `titulo`) das notas de `<cofre>/noticias/` da área nos últimos 7 dias e o limite de histórias.
 
 Ele devolve a lista de histórias candidatas, já agrupadas, sem repetição e com `risco: baixo | alto`.
 
@@ -46,9 +46,9 @@ Para cada história:
 
 ## 4. Gravar no cofre Obsidian
 
-O cofre é `cofre/` (abra essa pasta como vault no Obsidian). Escreva em português.
+O cofre é `<cofre>`, um vault do Obsidian. Escreva em português.
 
-**Uma nota por história verificada** (exceto `BULLSHIT` e `NÃO VERIFICÁVEL`) em `cofre/noticias/AAAA-MM-DD-<slug>.md`, `<slug>` curto, minúsculo, sem acento, com hífens:
+**Uma nota por história verificada** (exceto `BULLSHIT` e `NÃO VERIFICÁVEL`) em `<cofre>/noticias/AAAA-MM-DD-<slug>.md`, `<slug>` curto, minúsculo, sem acento, com hífens:
 
 ```markdown
 ---
@@ -77,7 +77,7 @@ tags: [<área>, <1-3 tags de assunto da lista do arquivo da área>, <até 2 tags
 Edição: [[AAAA-MM-DD-<área>]]
 ```
 
-**Uma nota de edição** por dia e área em `cofre/edicoes/AAAA-MM-DD-<área>.md`:
+**Uma nota de edição** por dia e área em `<cofre>/edicoes/AAAA-MM-DD-<área>.md`:
 
 ```markdown
 ---

@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
+// Caminho do cofre: campo "cofre" de config.local.json (fora do git); sem ele, cofre/ dentro do projeto.
+const CONFIG = join(RAIZ, 'config.local.json');
+const COFRE = existsSync(CONFIG) ? JSON.parse(readFileSync(CONFIG, 'utf8')).cofre : join(RAIZ, 'cofre');
 const MAX_ITENS = 15;   // por fonte, os mais recentes
 const RESUMO = 160;     // caracteres
 const TIMEOUT = 20000;  // ms por feed
@@ -92,7 +95,7 @@ async function baixar(url) {
 }
 
 function linksNoCofre(dias) {
-  const dir = join(RAIZ, 'cofre', 'noticias');
+  const dir = join(COFRE, 'noticias');
   if (!existsSync(dir)) return new Set();
   const corte = new Date(Date.now() - dias * 864e5).toISOString().slice(0, 10);
   return new Set(readdirSync(dir)
