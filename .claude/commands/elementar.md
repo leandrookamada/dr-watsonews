@@ -10,19 +10,22 @@ Gere o briefing de hoje.
 
 Leia `CLAUDE.md` e o arquivo da área antes de começar. Siga as etapas na ordem.
 
-## 1. Coleta e triagem — Lestrade
+## 1. Coleta e triagem — script + Lestrade
 
-Chame o subagente **lestrade** passando: a data de hoje, o conteúdo do arquivo da área, os títulos (campo `titulo`) das notas de `cofre/noticias/` da área nos últimos 7 dias e o limite de histórias.
-Ele devolve a lista de histórias candidatas, já agrupadas e sem repetição.
+1. Rode `node scripts/coletar.mjs <área>`. Ele baixa os feeds da área sem gastar tokens e grava `coleta/<área>.md`. Não leia esse arquivo na sessão principal: ele é para o Lestrade.
+2. Chame o subagente **lestrade** passando: a data de hoje, o caminho do arquivo da área, o caminho `coleta/<área>.md`, os títulos (campo `titulo`) das notas de `cofre/noticias/` da área nos últimos 7 dias e o limite de histórias.
 
-## 2. Verificação dupla — Watson e Mycroft em paralelo
+Ele devolve a lista de histórias candidatas, já agrupadas, sem repetição e com `risco: baixo | alto`.
 
-Para cada lote de até 3 histórias, dispare **na mesma mensagem**:
+## 2. Verificação — dupla para risco alto, simples para casos claros
 
-- um **watson** com as histórias (título, alegações, URLs);
-- um **mycroft** com as mesmas histórias.
+Passe a Watson e Mycroft só título, alegações e URLs, mais a seção "Checagens extras" do arquivo da área. Não passe o risco, o parecer de um para o outro, nem comentários do Lestrade: os dois julgam de forma independente (é o "consenso multi-modelo" do Frank).
 
-Passe só título, alegações e URLs, mais a seção "Checagens extras" do arquivo da área. Não passe o parecer de um para o outro, nem comentários do Lestrade: os dois julgam de forma independente (é o "consenso multi-modelo" do Frank).
+Se o Lestrade não marcou `risco` numa história, trate como `alto`.
+
+1. **Risco alto:** para cada lote de até 3 histórias, dispare **na mesma mensagem** um **watson** e um **mycroft** com as mesmas histórias.
+2. **Risco baixo:** dispare só um **watson** por lote de até 3, na mesma mensagem dos lotes de risco alto.
+3. Toda história de risco baixo em que o Watson **não** deu `CONFIRMADO` vai para um **mycroft** em seguida (lotes de até 3). Assim só fica com checagem simples o que é primário, corroborado e confirmado.
 
 ## 3. Consenso (você)
 
@@ -39,6 +42,7 @@ Para cada história:
 4. Rebaixe um nível se: só há fontes de nível baixa; ou todas as fontes são do mesmo grupo de independência (exceto quando a própria fonte primária é o fato, como um paper, experimento ou documento oficial lido diretamente).
    Se a fonte primária de uma alegação central não foi lida (403, paywall, post apagado), o teto é `PROVÁVEL`. Não rebaixe além disso: ausência de fonte primária não torna o fato `EXAGERADO`.
 5. Nota de confiança 0–100 = média das confianças dos dois, menos 15 se `contestado`.
+6. Checagem simples (só Watson, `CONFIRMADO`): veredito e confiança do Watson, com `checagem: simples` na nota.
 
 ## 4. Gravar no cofre Obsidian
 
@@ -55,6 +59,7 @@ secao: <uma das seções do arquivo da área>
 veredito: PROVÁVEL
 confianca: 72
 contestado: false
+checagem: dupla
 tags: [<área>, <1-3 tags de assunto da lista do arquivo da área>, <até 2 tags de entidade: produto, órgão, pessoa; minúsculo, sem acento, com hífens>]
 ---
 <resumo em 2–4 frases, só com o que foi verificado>

@@ -8,7 +8,8 @@
       "Grep",
       "Write(cofre/**)",
       "Edit(cofre/**)",
-      "Bash(node scripts/jornal.mjs)"
+      "Bash(node scripts/jornal.mjs)",
+      "Bash(node scripts/coletar.mjs:*)"
     ]
   }
 }
