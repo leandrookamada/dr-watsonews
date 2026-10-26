@@ -22,6 +22,8 @@ A CVE-2026-111497 ("Node2Shell") é um out-of-bounds write no decodificador Brot
 - O CVSS varia conforme o emissor: 9.2 (v4, Google) contra 8.1 (v3.1, Microsoft). Citar "9.2" sozinho infla a percepção.
 - RCE só demonstrado em condições específicas: a Imperva conseguiu num container Node 24.22.0, sem confiabilidade, e o PoC público só funciona em build enfraquecido.
 - "Node2Shell" é nome de marketing de pesquisa, não indica ataque em curso.
-- Os patches da Microsoft e do Python foram confirmados via SecurityWeek, não direto nos fabricantes.
+- Os patches da Microsoft e do Python foram confirmados via SecurityWeek, não direto nos fabricantes. (Corrigido pelo dossiê: o .NET confirma em fonte primária; o PowerShell saiu com o SDK corrigido; o patch do Visual Studio continua sem fonte primária.)
+
+Dossiê completo: [[2026-10-26-cve-2026-111497]]
 
 Edição: [[2026-10-26-tech]]

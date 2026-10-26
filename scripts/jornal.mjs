@@ -1,4 +1,4 @@
-// Gera jornal/index.html a partir das notas do cofre Obsidian (cofre/noticias e cofre/edicoes).
+// Gera jornal/index.html a partir das notas do cofre Obsidian (cofre/noticias, cofre/edicoes e cofre/dossies).
 // Uso: node scripts/jornal.mjs   |   node scripts/jornal.mjs --check (só valida o parser)
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
@@ -52,9 +52,10 @@ const dados = {
   gerado: new Date().toISOString(),
   noticias: lerPasta('noticias'),
   edicoes: lerPasta('edicoes'),
+  dossies: lerPasta('dossies'),
 };
 // `<` escapado para o JSON não fechar a tag <script> se alguma nota tiver "</script>".
 const json = JSON.stringify(dados).replace(/</g, '\\u003c');
 const html = readFileSync(caminho('jornal', 'template.html'), 'utf8').replace('__DADOS__', () => json);
 writeFileSync(caminho('jornal', 'index.html'), html);
-console.log(`jornal/index.html: ${dados.noticias.length} notícias, ${dados.edicoes.length} edições`);
+console.log(`jornal/index.html: ${dados.noticias.length} notícias, ${dados.edicoes.length} edições, ${dados.dossies.length} dossiês`);

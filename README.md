@@ -101,6 +101,10 @@ node scripts/jornal.mjs --check
 
 Para ler o resultado, abra a pasta `cofre/` como vault no Obsidian e o arquivo `jornal/index.html` no navegador. A página é um arquivo único, com busca, navegação por área, tags e arquivo de edições, e tema claro/escuro.
 
+### Dossiês
+
+Além do briefing diário, dá para pedir ao Claude Code uma pesquisa direcionada sobre um tema (por exemplo, uma CVE). Ela segue o mesmo método: frentes de Watson em paralelo para fontes primárias, exploração e ecossistema, e depois o Mycroft revisa as alegações consolidadas. O resultado vai para `cofre/dossies/AAAA-MM-DD-<tema>.md` e aparece na aba Dossiês do jornal.
+
 ### Formato das notas
 
 Cada notícia em `cofre/noticias/AAAA-MM-DD-<slug>.md` tem frontmatter (`titulo`, `data`, `area`, `secao`, `veredito`, `confianca`, `contestado`, `checagem`, `tags`), um resumo só com o que foi verificado, "Por que importa", links de evidência e red flags. A nota de edição do dia, em `cofre/edicoes/`, traz os destaques, a lista por seção e a tabela de descartados.
@@ -118,6 +122,7 @@ scripts/jornal.mjs             gera o jornal a partir do cofre (Node, sem depend
 jornal/template.html           visual do jornal (jornal/index.html é gerado)
 cofre/noticias/                uma nota por notícia
 cofre/edicoes/                 uma nota por dia e área
+cofre/dossies/                 pesquisas direcionadas sobre um tema (aba Dossiês no jornal)
 ```
 
 `coleta/` (saída intermediária da coleta) e `jornal/index.html` são gerados e ficam fora do Git.
