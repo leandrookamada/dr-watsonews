@@ -25,7 +25,7 @@ Para cada história:
 ### <id curto>
 - categoria: cyber | cs
 - título: <manchete mais neutra entre as encontradas>
-- alegações: <1-4 alegações factuais centrais, uma por linha>
+- alegações: <1-4 alegações factuais centrais, uma por linha, como os artigos as afirmam. Sem comentário seu ("não corroborado", "manchete diverge"): avaliar é trabalho do Watson e do Mycroft, e sua opinião contamina o julgamento independente deles>
 - urls: <todas as URLs do grupo, com a fonte e o nível de fontes.md>
 - continuação: sim/não
 ```
