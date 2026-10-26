@@ -5,8 +5,8 @@ argument-hint: "[área: tech|politica, padrão tech] [máx. de histórias, padr�
 
 Gere o briefing de hoje.
 
-- Área: `$1` (se vazio, `tech`). O arquivo da área é `areas/<área>.md`; se não existir, pare e liste as áreas disponíveis em `areas/`.
-- Limite de histórias verificadas: `$2` (se vazio, 12).
+- Área: `$0` (se vazio, `tech`). O arquivo da área é `areas/<área>.md`; se não existir, pare e liste as áreas disponíveis em `areas/`.
+- Limite de histórias verificadas: `$1` (se vazio, 12).
 
 Leia `CLAUDE.md` e o arquivo da área antes de começar. Siga as etapas na ordem.
 
@@ -36,7 +36,8 @@ Para cada história:
 1. Se Watson e Mycroft concordam, esse é o veredito.
 2. Se diferem em 1 nível, fique com o **pior** dos dois.
 3. Se diferem em 2+ níveis, use o pior e marque `contestado` com o motivo da divergência.
-4. Rebaixe um nível se: só há fontes de nível baixa; ou todas as fontes são do mesmo grupo de independência (exceto quando a própria fonte primária é o fato, como um paper, experimento ou documento oficial lido diretamente); ou a fonte primária não foi encontrada para uma alegação central.
+4. Rebaixe um nível se: só há fontes de nível baixa; ou todas as fontes são do mesmo grupo de independência (exceto quando a própria fonte primária é o fato, como um paper, experimento ou documento oficial lido diretamente).
+   Se a fonte primária de uma alegação central não foi lida (403, paywall, post apagado), o teto é `PROVÁVEL`. Não rebaixe além disso: ausência de fonte primária não torna o fato `EXAGERADO`.
 5. Nota de confiança 0–100 = média das confianças dos dois, menos 15 se `contestado`.
 
 ## 4. Gravar no cofre Obsidian
