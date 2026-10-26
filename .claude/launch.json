@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jornal",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "require('http').createServer((q,r)=>require('fs').createReadStream('jornal/index.html').on('error',()=>r.end()).pipe(r)).listen(4321)"],
+      "port": 4321
+    }
+  ]
+}

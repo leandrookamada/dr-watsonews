@@ -1,4 +1,24 @@
-# Fontes
+# Área: tech
+
+## Escopo
+
+Ciência da Computação e Cybersecurity: vulnerabilidades, incidentes, pesquisa, ferramentas, infraestrutura, IA aplicada.
+Descartar: patrocinado/webinar, vaga, review de produto, listas "top 10".
+Prioridade: exploração ativa/incidente amplo > vulnerabilidade crítica com patch > pesquisa relevante > resto.
+
+## Seções do briefing
+
+`## Cybersecurity` e `## Ciência da Computação`.
+
+## Tags de assunto
+
+`vulnerabilidade`, `exploracao-ativa`, `incidente`, `vazamento`, `ransomware`, `malware`, `phishing`, `ia`, `seguranca-de-ia`, `pesquisa`, `criptografia`, `privacidade`, `cloud`, `linux`, `web`, `open-source`, `hardware`, `regulacao`.
+
+## Checagens extras
+
+Nenhuma além das padrão de Watson e Mycroft.
+
+## Fontes
 
 Níveis de autoridade (como no Frank):
 
@@ -10,7 +30,7 @@ Grupos de independência: matérias do mesmo grupo editorial, ou que só reescre
 
 Feeds marcados com `bloqueia-bot` responderam 403/406 a requisições automáticas no teste inicial. Se o WebFetch falhar, use `WebSearch` com `site:<domínio>` nas últimas 24h.
 
-## Cybersecurity
+### Cybersecurity
 
 | Fonte | Feed | Nível | Obs. |
 |---|---|---|---|
@@ -31,7 +51,7 @@ Feeds marcados com `bloqueia-bot` responderam 403/406 a requisições automátic
 | The Hacker News | https://feeds.feedburner.com/TheHackersNews | baixa | manchetes infladas, muito conteúdo patrocinado; feed funciona, páginas de artigo dão 403 (use o resumo do feed e vá direto à fonte citada) |
 | CISO Advisor (BR) | https://cisoadvisor.com.br/feed/ | baixa | bloqueia-bot; muita tradução de terceiros |
 
-## Ciência da Computação
+### Ciência da Computação
 
 | Fonte | Feed | Nível | Obs. |
 |---|---|---|---|

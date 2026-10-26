@@ -6,8 +6,9 @@
       "Read",
       "Glob",
       "Grep",
-      "Write(briefings/**)",
-      "Edit(briefings/**)"
+      "Write(cofre/**)",
+      "Edit(cofre/**)",
+      "Bash(node scripts/jornal.mjs)"
     ]
   }
 }

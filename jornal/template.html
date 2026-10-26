@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dr. Watsonews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<style>
+:root {
+  --papel: #f6f1e7; --tinta: #1b1a17; --tinta-2: #55514a; --regra: #1b1a17; --regra-2: #cfc6b4;
+  --destaque: #8c1d18; --cartao: #fbf8f1;
+  --v-confirmado: #1f6b3a; --v-provavel: #1d4f8a; --v-exagerado: #a85a00; --v-nao-verificavel: #6b6b6b; --v-bullshit: #a3161b;
+  --titulo: "Playfair Display", Georgia, "Times New Roman", serif;
+  --texto: "Source Serif 4", Georgia, serif;
+  --meta: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel: #171614; --tinta: #ece6d9; --tinta-2: #a59f92; --regra: #ece6d9; --regra-2: #3b3833;
+    --destaque: #e0645c; --cartao: #1e1d1a;
+    --v-confirmado: #5cc382; --v-provavel: #6aa6ea; --v-exagerado: #f0a345; --v-nao-verificavel: #a0a0a0; --v-bullshit: #f06a6e;
+  }
+}
+:root[data-theme="dark"] {
+  --papel: #171614; --tinta: #ece6d9; --tinta-2: #a59f92; --regra: #ece6d9; --regra-2: #3b3833;
+  --destaque: #e0645c; --cartao: #1e1d1a;
+  --v-confirmado: #5cc382; --v-provavel: #6aa6ea; --v-exagerado: #f0a345; --v-nao-verificavel: #a0a0a0; --v-bullshit: #f06a6e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--papel); color: var(--tinta); font: 17px/1.55 var(--texto); }
+a { color: inherit; }
+.folha { max-width: 1180px; margin: 0 auto; padding: 0 16px 48px; }
+
+/* Cabeçalho */
+.faixa { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 12px var(--meta); letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-2); padding: 10px 0 6px; border-bottom: 1px solid var(--regra-2); }
+.logo { text-align: center; padding: 18px 0 6px; }
+.logo a { text-decoration: none; font: 900 clamp(40px, 8vw, 84px)/1 var(--titulo); letter-spacing: -.01em; }
+.lema { text-align: center; font-style: italic; color: var(--tinta-2); margin: 6px 0 14px; }
+nav { border-top: 3px double var(--regra); border-bottom: 1px solid var(--regra); display: flex; align-items: center; gap: 4px 18px; flex-wrap: wrap; padding: 8px 0; font: 600 13px var(--meta); text-transform: uppercase; letter-spacing: .08em; }
+nav a { text-decoration: none; padding: 2px 0; }
+nav a.ativo { color: var(--destaque); border-bottom: 2px solid var(--destaque); }
+nav form { margin-left: auto; }
+nav input { font: 14px var(--meta); padding: 5px 9px; border: 1px solid var(--regra-2); background: var(--cartao); color: var(--tinta); border-radius: 3px; width: 200px; max-width: 46vw; }
+#tema { background: none; border: 1px solid var(--regra-2); color: var(--tinta); font: 13px var(--meta); padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+
+/* Primeira página */
+.primeira { display: grid; grid-template-columns: 2fr 1fr; gap: 0 28px; margin-top: 22px; }
+.principal { border-right: 1px solid var(--regra-2); padding-right: 28px; }
+.manchete h2 { font: 900 clamp(28px, 4vw, 44px)/1.08 var(--titulo); margin: 6px 0 12px; }
+.manchete p.linha-fina { font-size: 20px; color: var(--tinta-2); margin: 0 0 12px; }
+.grade { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; margin-top: 18px; border-top: 1px solid var(--regra); }
+.grade .cartao { padding: 16px 18px 16px 0; border-bottom: 1px solid var(--regra-2); }
+.grade .cartao:nth-child(even) { padding: 16px 0 16px 18px; border-left: 1px solid var(--regra-2); }
+.lateral h3, .secao-titulo { font: 700 13px var(--meta); text-transform: uppercase; letter-spacing: .1em; border-top: 3px solid var(--regra); padding-top: 8px; margin: 0 0 10px; }
+.lateral section { margin-bottom: 26px; }
+.lateral .destaques { font-size: 15px; }
+.lateral .destaques ul { padding-left: 18px; margin: 6px 0; }
+.lateral .destaques h4 { font: 700 18px var(--titulo); margin: 12px 0 2px; }
+
+/* Cartões */
+.cartao h3 { font: 700 21px/1.2 var(--titulo); margin: 4px 0 8px; }
+.cartao h3 a, .manchete h2 a { text-decoration: none; }
+.cartao h3 a:hover, .manchete h2 a:hover { text-decoration: underline; }
+.cartao p { margin: 0 0 10px; font-size: 16px; color: var(--tinta-2); }
+.chapeu { font: 700 11px var(--meta); text-transform: uppercase; letter-spacing: .12em; color: var(--destaque); }
+.rodape-cartao { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font: 12px var(--meta); color: var(--tinta-2); }
+.selo { font: 700 11px var(--meta); letter-spacing: .06em; padding: 2px 7px; border: 1.5px solid currentColor; border-radius: 2px; white-space: nowrap; }
+.v-confirmado { color: var(--v-confirmado); } .v-provavel { color: var(--v-provavel); } .v-exagerado { color: var(--v-exagerado); }
+.v-nao-verificavel { color: var(--v-nao-verificavel); } .v-bullshit { color: var(--v-bullshit); }
+.tag { font: 12px var(--meta); text-decoration: none; color: var(--tinta-2); }
+.tag:hover { color: var(--destaque); }
+.lista .cartao { border-bottom: 1px solid var(--regra-2); padding: 16px 0; max-width: 780px; }
+.nuvem { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.nuvem a { text-decoration: none; font-family: var(--meta); }
+.nuvem a small { color: var(--tinta-2); }
+
+/* Matéria */
+article.materia { max-width: 760px; margin: 28px auto 0; }
+article.materia h1 { font: 900 clamp(30px, 5vw, 48px)/1.08 var(--titulo); margin: 8px 0 14px; }
+.meta-materia { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font: 13px var(--meta); color: var(--tinta-2); padding: 10px 0; border-top: 1px solid var(--regra); border-bottom: 1px solid var(--regra-2); margin-bottom: 18px; }
+.corpo h1, .corpo h2 { font: 700 22px var(--titulo); margin: 26px 0 8px; }
+.corpo code { font-size: .88em; background: var(--cartao); padding: 1px 4px; border-radius: 3px; }
+.corpo table { border-collapse: collapse; width: 100%; font: 14px var(--meta); }
+.corpo th, .corpo td { border-bottom: 1px solid var(--regra-2); padding: 6px 8px; text-align: left; vertical-align: top; }
+.corpo blockquote { margin: 0 0 16px; padding: 4px 14px; border-left: 3px solid var(--destaque); color: var(--tinta-2); }
+.corpo > p:first-child::first-letter { font: 900 3.4em/0.85 var(--titulo); float: left; padding: 6px 8px 0 0; }
+.vazio { padding: 40px 0; color: var(--tinta-2); font-style: italic; }
+footer { margin-top: 40px; border-top: 1px solid var(--regra-2); padding-top: 10px; font: 12px var(--meta); color: var(--tinta-2); text-align: center; }
+
+@media (max-width: 760px) {
+  .primeira { grid-template-columns: 1fr; }
+  .principal { border-right: 0; padding-right: 0; }
+  .grade { grid-template-columns: 1fr; }
+  .grade .cartao, .grade .cartao:nth-child(even) { padding: 14px 0; border-left: 0; }
+  nav form { margin-left: 0; width: 100%; }
+  nav input { width: 100%; max-width: none; }
+}
+</style>
+</head>
+<body>
+<div class="folha">
+  <div class="faixa"><span id="data-edicao"></span><span id="contagem"></span><button id="tema" type="button" aria-label="Alternar tema">◐ tema</button></div>
+  <div class="logo"><a href="#/">Dr. Watsonews</a></div>
+  <p class="lema">Elementar, meu caro leitor: só o que sobreviveu à checagem.</p>
+  <nav id="menu">
+    <a href="#/" data-rota="">Início</a>
+    <a href="#/area/tech" data-rota="area/tech">Tech</a>
+    <a href="#/area/politica" data-rota="area/politica">Política</a>
+    <a href="#/tags" data-rota="tags">Tags</a>
+    <a href="#/arquivo" data-rota="arquivo">Arquivo</a>
+    <form id="busca" role="search"><input type="search" name="q" placeholder="Buscar notícias…" aria-label="Buscar notícias"></form>
+  </nav>
+  <main id="app"></main>
+  <footer id="rodape"></footer>
+</div>
+
+<script id="dados" type="application/json">__DADOS__</script>
+<script>
+const DADOS = JSON.parse(document.getElementById('dados').textContent);
+const AREAS = { tech: 'Tech', politica: 'Política' };
+const ORDEM = ['CONFIRMADO', 'PROVÁVEL', 'EXAGERADO', 'NÃO VERIFICÁVEL', 'BULLSHIT'];
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const slug = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, '-');
+const nomeArea = a => AREAS[a] || (a ? a[0].toUpperCase() + a.slice(1) : '');
+const dataBR = d => d ? d.split('-').reverse().join('/') : '';
+const tagsDe = n => (n.meta.tags || []).filter(t => t !== n.meta.area);
+
+const noticias = DADOS.noticias
+  .map(n => ({ ...n, busca: slug([n.meta.titulo, n.corpo, (n.meta.tags || []).join(' ')].join(' ')) }))
+  .sort((a, b) => String(b.meta.data).localeCompare(String(a.meta.data))
+    || ORDEM.indexOf(a.meta.veredito) - ORDEM.indexOf(b.meta.veredito)
+    || (b.meta.confianca || 0) - (a.meta.confianca || 0));
+const porId = Object.fromEntries(noticias.map(n => [n.id, n]));
+const edicoes = DADOS.edicoes.sort((a, b) => String(b.meta.data).localeCompare(String(a.meta.data)));
+const edPorId = Object.fromEntries(edicoes.map(e => [e.id, e]));
+
+function wikilinks(md) {
+  return md.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, id, rotulo) => {
+    id = id.trim();
+    if (porId[id]) return `[${rotulo || porId[id].meta.titulo}](#/n/${encodeURIComponent(id)})`;
+    if (edPorId[id]) return `[${rotulo || 'Edição ' + nomeArea(edPorId[id].meta.area) + ' de ' + dataBR(edPorId[id].meta.data)}](#/e/${encodeURIComponent(id)})`;
+    return rotulo || id;
+  });
+}
+
+function markdown(md) {
+  md = wikilinks(md);
+  if (!window.marked || !window.DOMPurify) return `<pre style="white-space:pre-wrap">${esc(md)}</pre>`;
+  const div = document.createElement('div');
+  div.innerHTML = DOMPurify.sanitize(marked.parse(md));
+  div.querySelectorAll('a[href^="http"]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+  return div.innerHTML;
+}
+
+function linhaFina(n) {
+  const p = n.corpo.split(/\n\s*\n/).find(t => t.trim() && !t.trim().startsWith('#')) || '';
+  const txt = p.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, '$2$1').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`>]/g, '').trim();
+  return txt.length > 240 ? txt.slice(0, 237).replace(/\s+\S*$/, '') + '…' : txt;
+}
+
+const selo = n => n.meta.veredito
+  ? `<span class="selo v-${slug(n.meta.veredito)}">${esc(n.meta.veredito)}${n.meta.confianca != null ? ' · ' + esc(n.meta.confianca) : ''}</span>${n.meta.contestado ? '<span class="selo v-exagerado">CONTESTADO</span>' : ''}`
+  : '';
+const chipsTags = n => tagsDe(n).map(t => `<a class="tag" href="#/tag/${encodeURIComponent(t)}">#${esc(t)}</a>`).join(' ');
+
+function cartao(n, comLinhaFina = true) {
+  return `<div class="cartao">
+    <div class="chapeu">${esc(n.meta.secao || nomeArea(n.meta.area))}</div>
+    <h3><a href="#/n/${encodeURIComponent(n.id)}">${esc(n.meta.titulo || n.id)}</a></h3>
+    ${comLinhaFina ? `<p>${esc(linhaFina(n))}</p>` : ''}
+    <div class="rodape-cartao">${selo(n)}<span>${esc(dataBR(n.meta.data))}</span>${chipsTags(n)}</div>
+  </div>`;
+}
+
+function contarTags(lista) {
+  const c = {};
+  lista.forEach(n => tagsDe(n).forEach(t => c[t] = (c[t] || 0) + 1));
+  return Object.entries(c).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+const nuvem = lista => `<div class="nuvem">${contarTags(lista).map(([t, q]) => `<a href="#/tag/${encodeURIComponent(t)}">#${esc(t)} <small>${q}</small></a>`).join('')}</div>`;
+
+function secaoDestaques(e) {
+  const m = e.corpo.match(/## Destaques\n([\s\S]*?)(\n## |$)/);
+  return m ? markdown(m[1]) : '';
+}
+
+const telas = {
+  inicio() {
+    if (!noticias.length) return '<p class="vazio">O cofre ainda não tem notícias. Rode <code>/elementar</code>.</p>';
+    // Primeira página: as notícias da edição mais recente de cada área.
+    const ultima = {};
+    noticias.forEach(n => { if (!ultima[n.meta.area] || n.meta.data > ultima[n.meta.area]) ultima[n.meta.area] = n.meta.data; });
+    const capa = noticias.filter(n => n.meta.data === ultima[n.meta.area]);
+    const [lider, ...resto] = capa;
+    const eds = Object.entries(ultima).map(([a, d]) => edicoes.find(e => e.meta.area === a && e.meta.data === d)).filter(Boolean);
+    const anteriores = noticias.filter(n => !capa.includes(n)).slice(0, 8);
+    return `<div class="primeira">
+      <div class="principal">
+        <div class="manchete">
+          <div class="chapeu">${esc(lider.meta.secao || nomeArea(lider.meta.area))}</div>
+          <h2><a href="#/n/${encodeURIComponent(lider.id)}">${esc(lider.meta.titulo)}</a></h2>
+          <p class="linha-fina">${esc(linhaFina(lider))}</p>
+          <div class="rodape-cartao">${selo(lider)}<span>${esc(dataBR(lider.meta.data))}</span>${chipsTags(lider)}</div>
+        </div>
+        <div class="grade">${resto.map(n => cartao(n)).join('')}</div>
+        ${anteriores.length ? `<h3 class="secao-titulo" style="margin-top:28px">Edições anteriores</h3><div class="grade">${anteriores.map(n => cartao(n, false)).join('')}</div>` : ''}
+      </div>
+      <aside class="lateral">
+        ${eds.map(e => `<section><h3>Destaques · ${esc(nomeArea(e.meta.area))}</h3><div class="destaques">${secaoDestaques(e)}<a class="tag" href="#/e/${encodeURIComponent(e.id)}">Ver edição completa →</a></div></section>`).join('')}
+        <section><h3>Assuntos</h3>${nuvem(noticias)}</section>
+      </aside>
+    </div>`;
+  },
+  lista(titulo, lista, extra = '') {
+    return `<h2 class="secao-titulo" style="margin-top:22px">${titulo}</h2>${extra}
+      <div class="lista">${lista.length ? lista.map(n => cartao(n)).join('') : '<p class="vazio">Nada por aqui.</p>'}</div>`;
+  },
+  area(a) {
+    const lista = noticias.filter(n => n.meta.area === a);
+    return telas.lista(esc(nomeArea(a)), lista, lista.length ? `<div style="margin-bottom:12px">${nuvem(lista)}</div>` : '');
+  },
+  tag: t => telas.lista('#' + esc(t), noticias.filter(n => (n.meta.tags || []).includes(t))),
+  data: d => telas.lista('Notícias de ' + esc(dataBR(d)), noticias.filter(n => n.meta.data === d)),
+  busca(q) {
+    const termos = slug(q).split(/\s+/).filter(Boolean);
+    return telas.lista(`Busca: “${esc(q)}”`, noticias.filter(n => termos.every(t => n.busca.includes(t))));
+  },
+  tags: () => `<h2 class="secao-titulo" style="margin-top:22px">Todos os assuntos</h2>${nuvem(noticias)}`,
+  arquivo() {
+    const datas = [...new Set([...noticias.map(n => n.meta.data), ...edicoes.map(e => e.meta.data)])].sort().reverse();
+    return `<h2 class="secao-titulo" style="margin-top:22px">Arquivo</h2><div class="lista">${datas.map(d => `
+      <div class="cartao"><h3><a href="#/data/${esc(d)}">${esc(dataBR(d))}</a></h3>
+      <div class="rodape-cartao">${edicoes.filter(e => e.meta.data === d).map(e => `<a class="tag" href="#/e/${encodeURIComponent(e.id)}">Edição ${esc(nomeArea(e.meta.area))}</a>`).join(' · ')}
+      <span>${noticias.filter(n => n.meta.data === d).length} notícias</span></div></div>`).join('')}</div>`;
+  },
+  noticia(id) {
+    const n = porId[id];
+    if (!n) return '<p class="vazio">Notícia não encontrada.</p>';
+    return `<article class="materia">
+      <div class="chapeu">${esc(nomeArea(n.meta.area))}${n.meta.secao ? ' · ' + esc(n.meta.secao) : ''}</div>
+      <h1>${esc(n.meta.titulo)}</h1>
+      <div class="meta-materia">${selo(n)}<a class="tag" href="#/data/${esc(n.meta.data)}">${esc(dataBR(n.meta.data))}</a>${chipsTags(n)}</div>
+      <div class="corpo">${markdown(n.corpo)}</div>
+    </article>`;
+  },
+  edicao(id) {
+    const e = edPorId[id];
+    if (!e) return '<p class="vazio">Edição não encontrada.</p>';
+    return `<article class="materia"><div class="chapeu">Edição ${esc(nomeArea(e.meta.area))}</div><div class="corpo">${markdown(e.corpo)}</div></article>`;
+  },
+};
+
+function rotear() {
+  const [rota, ...resto] = decodeURIComponent(location.hash.replace(/^#\/?/, '')).split('/');
+  const arg = resto.join('/');
+  const html = {
+    '': () => telas.inicio(), area: () => telas.area(arg), tag: () => telas.tag(arg), data: () => telas.data(arg),
+    busca: () => telas.busca(arg), tags: () => telas.tags(), arquivo: () => telas.arquivo(),
+    n: () => telas.noticia(arg), e: () => telas.edicao(arg),
+  }[rota];
+  document.getElementById('app').innerHTML = html ? html() : '<p class="vazio">Página não encontrada.</p>';
+  const atual = rota === 'area' ? 'area/' + arg : rota;
+  document.querySelectorAll('#menu a').forEach(a => a.classList.toggle('ativo', a.dataset.rota === atual));
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('busca').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const q = ev.target.q.value.trim();
+  if (q) location.hash = '#/busca/' + encodeURIComponent(q);
+});
+
+const raiz = document.documentElement;
+try { const t = localStorage.getItem('tema'); if (t) raiz.dataset.theme = t; } catch {}
+document.getElementById('tema').addEventListener('click', () => {
+  const escuro = raiz.dataset.theme ? raiz.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  raiz.dataset.theme = escuro ? 'light' : 'dark';
+  try { localStorage.setItem('tema', raiz.dataset.theme); } catch {}
+});
+
+const maisRecente = noticias[0]?.meta.data;
+document.getElementById('data-edicao').textContent = maisRecente ? 'Edição de ' + dataBR(maisRecente) : '';
+document.getElementById('contagem').textContent = `${noticias.length} notícias · ${edicoes.length} edições`;
+document.getElementById('rodape').textContent = 'Gerado em ' + new Date(DADOS.gerado).toLocaleString('pt-BR') + ' a partir do cofre Obsidian.';
+addEventListener('hashchange', rotear);
+rotear();
+</script>
+</body>
+</html>
