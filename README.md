@@ -57,6 +57,8 @@ Histórias de **risco baixo** (fonte primária, 2+ grupos independentes, sem fon
 | `tech` | Ciência da Computação e Cybersecurity | Cybersecurity, Ciência da Computação |
 | `politica` | Política do Brasil e internacional | Brasil, Internacional |
 
+A área `tech` também coleta do GitHub: advisories revisados do GitHub Advisory Database (critical e high), releases de segurança de projetos-chave (Node.js, OpenSSL, curl, Kubernetes), o GitHub Security Lab e repositórios novos de PoC de CVE (tratados só como sinal, nunca como prova de exploração).
+
 A área `politica` tem checagens extras: etapa institucional (comissão × plenário, liminar × plenário, denúncia × condenação), números oficiais, pesquisas eleitorais, fontes anônimas e comparação de enquadramento entre veículos de perfis diferentes.
 
 **Para criar uma área nova**, adicione `areas/<nome>.md` com as mesmas seções dos arquivos existentes: Escopo, Seções do briefing, Tags de assunto, Checagens extras e Fontes (tabelas com feed e nível de autoridade). Depois é só rodar `/elementar <nome>`.
@@ -66,6 +68,7 @@ A área `politica` tem checagens extras: etapa institucional (comissão × plen�
 - [Claude Code](https://claude.com/claude-code) com uma assinatura Claude (o plano Pro basta).
 - Node.js 22 ou superior. Os scripts usam só a biblioteca padrão, sem `npm install`.
 - Opcional: [Obsidian](https://obsidian.md), para navegar pelo cofre.
+- Opcional: variável `GITHUB_TOKEN` com um token **só de leitura**, para a coleta usar a API do GitHub com limite maior (sem ela, funciona com o limite público de 60 requisições/hora).
 
 ## Uso
 
@@ -139,7 +142,9 @@ cofre/dossies/                 pesquisas direcionadas sobre um tema (aba Dossiê
 
 Todo conteúdo buscado na web (artigos, feeds, comentários) é tratado como **dado, não instrução**. Páginas que tentam dar ordens aos agentes são ignoradas e registradas como red flag da fonte.
 
-As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita em `cofre/` e execução dos dois scripts do projeto. Durante uma execução, o pipeline só escreve dentro de `cofre/` (e, pelos scripts, em `coleta/` e `jornal/`).
+As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita em `cofre/` e execução dos dois scripts do projeto. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
+
+Durante uma execução, o pipeline só escreve dentro de `cofre/` (e, pelos scripts, em `coleta/` e `jornal/`).
 
 ## Licença
 

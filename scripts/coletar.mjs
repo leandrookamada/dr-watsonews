@@ -30,10 +30,22 @@ function campo(bloco, ...nomes) {
   return '';
 }
 
-// RSS 2.0, Atom e o JSON do catálogo KEV da CISA.
+// RSS 2.0, Atom, o JSON do catálogo KEV da CISA e as APIs do GitHub (advisories e busca de repositórios).
 export function parseFeed(corpo) {
-  if (corpo.trimStart().startsWith('{')) {
+  if (/^[[{]/.test(corpo.trimStart())) {
     const d = JSON.parse(corpo);
+    if (Array.isArray(d)) return d.map(a => ({
+      titulo: `${a.ghsa_id}${a.cve_id ? ` / ${a.cve_id}` : ''} [${a.severity}] ${a.summary}`,
+      link: a.html_url,
+      data: new Date(a.published_at),
+      resumo: (a.vulnerabilities || []).map(v => `${v.package?.ecosystem}:${v.package?.name}`).join(', '),
+    }));
+    if (d.items) return d.items.map(r => ({
+      titulo: `${r.full_name} (★${r.stargazers_count})`,
+      link: r.html_url,
+      data: new Date(r.created_at),
+      resumo: r.description || '',
+    }));
     return (d.vulnerabilities || []).map(v => ({
       titulo: `${v.cveID}: ${v.vulnerabilityName}`,
       link: `https://www.cve.org/CVERecord?id=${v.cveID}`,
@@ -63,7 +75,13 @@ export function fontesDaArea(md) {
 }
 
 async function baixar(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: '*/*' }, signal: AbortSignal.timeout(TIMEOUT) });
+  const headers = { 'User-Agent': UA, Accept: '*/*' };
+  if (url.startsWith('https://api.github.com/')) {
+    headers.Accept = 'application/vnd.github+json';
+    // Opcional: um token só de leitura sobe o limite de 60 para 5000 req/h. Sem ele, funciona igual.
+    if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+  const r = await fetch(url, { headers, signal: AbortSignal.timeout(TIMEOUT) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const bytes = await r.arrayBuffer();
   // Alguns feeds brasileiros ainda vêm em ISO-8859-1.
@@ -95,6 +113,12 @@ if (process.argv.includes('--check')) {
   assert.equal(atom[0].link, 'https://y/2');
   const kev = parseFeed('{"vulnerabilities":[{"cveID":"CVE-1","vulnerabilityName":"n","dateAdded":"2026-10-23"}]}');
   assert.equal(kev[0].link, 'https://www.cve.org/CVERecord?id=CVE-1');
+  const ghsa = parseFeed('[{"ghsa_id":"GHSA-1","cve_id":"CVE-2","severity":"critical","summary":"s","html_url":"https://g/1","published_at":"2026-10-26T01:00:00Z","vulnerabilities":[{"package":{"ecosystem":"npm","name":"x"}}]}]');
+  assert.equal(ghsa[0].titulo, 'GHSA-1 / CVE-2 [critical] s');
+  assert.equal(ghsa[0].resumo, 'npm:x');
+  const repos = parseFeed('{"total_count":1,"items":[{"full_name":"a/CVE-1-poc","stargazers_count":3,"html_url":"https://g/2","created_at":"2026-10-26T02:00:00Z","description":null}]}');
+  assert.equal(repos[0].titulo, 'a/CVE-1-poc (★3)');
+  assert.deepEqual(parseFeed('[]'), []);
   const f = fontesDaArea('| Fonte | Feed |\n|---|---|\n| G1 | https://g1/rss | secundária | Globo |\n| STF | sem feed |');
   assert.deepEqual(f, [{ nome: 'G1', url: 'https://g1/rss', meta: 'secundária · Globo' }]);
   console.log('coleta ok');
@@ -114,10 +138,15 @@ const corte = Date.now() - horas * 36e5;
 const jaVistos = linksNoCofre(7);
 let removidos = 0;
 
+// `{desde}` na URL (busca do GitHub) vira a data de início da janela.
+const desde = new Date(corte).toISOString().slice(0, 10);
+
 const resultados = await Promise.all(fontes.map(async f => {
   try {
-    const itens = parseFeed(await baixar(f.url));
-    if (!itens.length) return { ...f, falha: 'sem itens (página sem RSS?)' };
+    const url = f.url.replaceAll('{desde}', desde);
+    const itens = parseFeed(await baixar(url));
+    // API do GitHub sem resultado é dia sem novidade, não falha.
+    if (!itens.length) return url.startsWith('https://api.github.com/') ? { ...f, itens: [] } : { ...f, falha: 'sem itens (página sem RSS?)' };
     const novos = itens.filter(i => i.data && !isNaN(i.data) && i.data >= corte && i.link);
     if (!novos.length && itens.every(i => !i.data || isNaN(i.data))) return { ...f, falha: 'itens sem data' };
     const filtrados = novos.filter(i => !jaVistos.has(i.link));

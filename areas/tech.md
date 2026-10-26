@@ -63,4 +63,18 @@ Feeds marcados com `bloqueia-bot` responderam 403/406 a requisições automátic
 | Hacker News (200+ pts) | https://hnrss.org/frontpage?points=200 | baixa | pista; seguir o link original |
 | Lobsters | https://lobste.rs/rss | baixa | pista; seguir o link original |
 
+### GitHub
+
+| Fonte | Feed | Nível | Obs. |
+|---|---|---|---|
+| GitHub Advisory Database (critical) | https://api.github.com/advisories?type=reviewed&severity=critical&per_page=50 | primária | advisories revisados pelo GitHub; CVE, pacote e ecossistema |
+| GitHub Advisory Database (high) | https://api.github.com/advisories?type=reviewed&severity=high&per_page=50 | primária | volume alto: priorizar pacotes muito usados |
+| GitHub Security Lab | https://github.blog/tag/github-security-lab/feed/ | primária | pesquisa original de vulnerabilidades |
+| GitHub Blog Security | https://github.blog/security/feed/ | secundária | parte é anúncio de produto do GitHub |
+| Releases Node.js | https://github.com/nodejs/node/releases.atom | primária | só interessa release de segurança |
+| Releases OpenSSL | https://github.com/openssl/openssl/releases.atom | primária | só interessa release de segurança |
+| Releases curl | https://github.com/curl/curl/releases.atom | primária | só interessa release de segurança |
+| Releases Kubernetes | https://github.com/kubernetes/kubernetes/releases.atom | primária | só interessa release de segurança |
+| PoCs novos de CVE | https://api.github.com/search/repositories?q=CVE+in:name+created:%3E%3D{desde}&sort=stars&order=desc&per_page=30 | baixa | sinal de PoC público, nunca prova de exploração; repositórios de PoC falsos com malware são comuns: nunca executar nada |
+
 Para adicionar fonte: nova linha na tabela certa. Nada mais precisa mudar.
