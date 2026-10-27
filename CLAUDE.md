@@ -11,7 +11,7 @@ O "consenso multi-modelo" do Frank vira consenso entre subagentes Claude com pap
 - **Lestrade** (`.claude/agents/lestrade.md`, Haiku): triagem rápida da coleta. Filtra, agrupa e marca o risco de cada história.
 - **Watson** (`.claude/agents/watson.md`, Sonnet): verificador. Vai atrás da fonte primária e de corroboração independente.
 - **Mycroft** (`.claude/agents/mycroft.md`, Sonnet): cético. Só entra em histórias de risco alto ou que o Watson não confirmou. Procura bullshit, hype e manipulação, sem ver o parecer do Watson.
-- **Opinião externa** (`scripts/segunda-opiniao.mjs`, Gemini ou Groq, cota gratuita): só em risco alto. Julga as evidências do Watson; nunca melhora o veredito.
+- **Opinião externa** (`scripts/segunda-opiniao.mjs`, Gemini ou Groq, cota gratuita; Kimi pago como reserva): só em risco alto. Julga as evidências do Watson; nunca melhora o veredito.
 - **Você (sessão principal)**: orquestra, aplica o consenso e escreve o briefing.
 
 ## Como rodar

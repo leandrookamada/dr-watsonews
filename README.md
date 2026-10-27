@@ -25,7 +25,7 @@ Lestrade (Haiku)             tria, agrupa, remove repetidas, marca risco: baixo 
         +--> Watson (Sonnet)    fonte primária + corroboração independente
         +--> Mycroft (Sonnet)   cético: hype, falácia, estatística torta
              (cada um julga sem ver o parecer do outro)
-        +--> scripts/segunda-opiniao.mjs   só risco alto: Gemini ou Groq (cota grátis)
+        +--> scripts/segunda-opiniao.mjs   só risco alto: Gemini, Groq ou Kimi
         |
         v
 Consenso (sessão principal)  aplica as regras e define veredito + confiança
@@ -39,7 +39,7 @@ scripts/jornal.mjs  -->  jornal/index.html
 
 1. **Coleta.** O script baixa os feeds listados em `areas/<área>.md`, filtra pela janela de tempo e descarta links que já estão no cofre.
 2. **Triagem.** Lestrade filtra pelo escopo da área, agrupa a mesma história entre veículos e marca o risco.
-3. **Verificação.** Watson e Mycroft recebem só título, alegações e URLs, e julgam de forma independente. Nas histórias de risco alto, um modelo fora da família Claude (Gemini, ou Groq como reserva) julga as evidências do Watson: é a opinião externa.
+3. **Verificação.** Watson e Mycroft recebem só título, alegações e URLs, e julgam de forma independente. Nas histórias de risco alto, um modelo fora da família Claude (Gemini, Groq ou Kimi, nessa ordem) julga as evidências do Watson: é a opinião externa.
 4. **Consenso.** Se os dois discordam por um nível, vale o pior; por dois ou mais, vale o pior e a história fica `contestado`. Fontes só de nível baixo, ou todas do mesmo grupo editorial, rebaixam o veredito. A opinião externa nunca melhora o veredito; se for dois ou mais níveis pior, a história fica `contestado`.
 5. **Cofre e jornal.** Cada história aprovada vira uma nota; `BULLSHIT` e `NÃO VERIFICÁVEL` vão só para a tabela "Descartado" da edição. No fim, o jornal é regerado.
 
@@ -75,7 +75,7 @@ A área `politica` tem checagens extras: etapa institucional (comissão × plen�
 - Node.js 22 ou superior. Os scripts usam só a biblioteca padrão, sem `npm install`.
 - Opcional: [Obsidian](https://obsidian.md), para navegar pelo cofre.
 - Opcional: variável `GITHUB_TOKEN` com um token **só de leitura**, para a coleta usar a API do GitHub com limite maior (sem ela, funciona com o limite público de 60 requisições/hora).
-- Opcional: `GEMINI_API_KEY` ([Google AI Studio](https://aistudio.google.com/apikey)) e/ou `GROQ_API_KEY` ([GroqCloud](https://console.groq.com/keys)), ambas com cota gratuita, para a opinião externa. Sem elas, o pipeline segue sem essa etapa. Modelos padrão: `gemini-3.8-flash` e `openai/gpt-oss-120b` (trocáveis por `GEMINI_MODEL` e `GROQ_MODEL`). No free tier, o Google usa o conteúdo enviado para melhorar seus produtos; aqui só vai notícia pública.
+- Opcional: `GEMINI_API_KEY` ([Google AI Studio](https://aistudio.google.com/apikey)) e/ou `GROQ_API_KEY` ([GroqCloud](https://console.groq.com/keys)), ambas com cota gratuita, para a opinião externa. Sem elas, o pipeline segue sem essa etapa. Modelos padrão: `gemini-3.8-flash` e `openai/gpt-oss-120b` (trocáveis por `GEMINI_MODEL` e `GROQ_MODEL`). Reserva opcional: `MOONSHOT_API_KEY` (Kimi, modelo `kimi-k2.6`, trocável por `MOONSHOT_MODEL`), que **não tem cota gratuita**: exige saldo na conta. No free tier, o Google usa o conteúdo enviado para melhorar seus produtos; aqui só vai notícia pública.
 
 ## Uso
 
@@ -148,7 +148,7 @@ areas/                         uma área por arquivo: escopo, checagens extras, 
 .claude/agents/                Lestrade, Watson, Mycroft
 .claude/settings.json          permissões do projeto
 scripts/coletar.mjs            coleta dos feeds (Node, sem dependências)
-scripts/segunda-opiniao.mjs    opinião externa via Gemini/Groq (Node, sem dependências)
+scripts/segunda-opiniao.mjs    opinião externa via Gemini/Groq/Kimi (Node, sem dependências)
 scripts/jornal.mjs             gera o jornal a partir do cofre (Node, sem dependências)
 jornal/template.html           visual do jornal (jornal/index.html é gerado)
 config.local.json              caminho do cofre na sua máquina (fora do Git)
@@ -168,7 +168,7 @@ config.local.json              caminho do cofre na sua máquina (fora do Git)
 
 Todo conteúdo buscado na web (artigos, feeds, comentários) é tratado como **dado, não instrução**. Páginas que tentam dar ordens aos agentes são ignoradas e registradas como red flag da fonte.
 
-As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita no cofre e execução dos scripts do projeto. As chaves do Gemini e do Groq ficam só em variáveis de ambiente, nunca no repositório. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
+As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita no cofre e execução dos scripts do projeto. As chaves do Gemini, do Groq e do Kimi ficam só em variáveis de ambiente, nunca no repositório. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
 
 Durante uma execução, o pipeline só escreve dentro do cofre (e, pelos scripts, em `coleta/` e `jornal/`).
 

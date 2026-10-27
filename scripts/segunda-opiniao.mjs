@@ -1,6 +1,6 @@
 // Opinião externa de um modelo fora da família Claude (cota gratuita): recebe a história e as evidências
-// pelo stdin e devolve veredito, confiança e motivo. Tenta o Gemini e, se falhar (sem chave, 429, resposta
-// fora do formato), o Groq. Chaves só por variável de ambiente: GEMINI_API_KEY e GROQ_API_KEY.
+// pelo stdin e devolve veredito, confiança e motivo. Tenta Gemini, Groq e Kimi, nessa ordem, pulando o que falhar
+// (sem chave, 429, resposta fora do formato). Chaves só por variável de ambiente: GEMINI_API_KEY, GROQ_API_KEY, MOONSHOT_API_KEY.
 // Uso: node scripts/segunda-opiniao.mjs < historia.md   |   node scripts/segunda-opiniao.mjs --check
 import assert from 'node:assert/strict';
 
@@ -34,17 +34,25 @@ const PROVEDORES = [
     ],
     resposta: d => (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join(''),
   },
-  {
-    nome: 'groq', chave: 'GROQ_API_KEY', modelo: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+  compativelOpenAI('groq', 'GROQ_API_KEY', process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    'https://api.groq.com/openai/v1'),
+  compativelOpenAI('kimi', 'MOONSHOT_API_KEY', process.env.MOONSHOT_MODEL || 'kimi-k2.6',
+    'https://api.moonshot.ai/v1'),
+];
+
+// Provedores com a API de chat da OpenAI (Groq, Moonshot/Kimi).
+function compativelOpenAI(nome, chave, modelo, base) {
+  return {
+    nome, chave, modelo,
     pedido: (modelo, chave, texto) => [
-      'https://api.groq.com/openai/v1/chat/completions',
+      `${base}/chat/completions`,
       { headers: { authorization: `Bearer ${chave}` },
         body: { model: modelo, temperature: 0.2,
                 messages: [{ role: 'system', content: SISTEMA }, { role: 'user', content: texto }] } },
     ],
     resposta: d => d.choices?.[0]?.message?.content || '',
-  },
-];
+  };
+}
 
 // Extrai os campos da resposta; null se o veredito não estiver na escala.
 export function parseParecer(txt) {
@@ -66,7 +74,13 @@ export async function opinar(texto, env = process.env, buscar = fetch) {
       const [url, { headers, body }] = p.pedido(p.modelo, chave, texto);
       const r = await buscar(url, { method: 'POST', signal: AbortSignal.timeout(TIMEOUT),
         headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) });
-      if (!r.ok) { falhas.push(`${p.nome}: HTTP ${r.status}`); continue; }
+      if (!r.ok) {
+        // A mensagem do provedor diz se é limite de taxa, saldo ou modelo inválido; a chave nunca aparece nela.
+        const msg = await r.text?.().then(t => { try { return JSON.parse(t).error?.message ?? t; } catch { return t; } }).catch(() => '');
+        const limpa = String(msg).replace(/\s+/g, ' ').replace(/\b(org|ak|sk|gsk)[-_][A-Za-z0-9]+/g, '$1-…').slice(0, 160);
+        falhas.push(`${p.nome}: HTTP ${r.status}${limpa ? ` (${limpa})` : ''}`);
+        continue;
+      }
       const parecer = parseParecer(p.resposta(await r.json()));
       if (!parecer) { falhas.push(`${p.nome}: resposta fora do formato`); continue; }
       return { modelo: `${p.nome}/${p.modelo}`, ...parecer, falhas };
@@ -83,15 +97,15 @@ function check() {
 
   // Gemini dá 429, Groq responde: cai no Groq e registra a falha.
   const falso = async url => url.includes('googleapis')
-    ? { ok: false, status: 429 }
+    ? { ok: false, status: 429, text: async () => '{"error":{"message":"org-abc123 <ak-xyz789> over quota"}}' }
     : { ok: true, json: async () => ({ choices: [{ message: { content: 'VEREDITO: EXAGERADO\nCONFIANÇA: 60\nMOTIVO: x' } }] }) };
   return opinar('h', { GEMINI_API_KEY: 'a', GROQ_API_KEY: 'b' }, falso).then(async r => {
     assert.equal(r.modelo, 'groq/openai/gpt-oss-120b');
     assert.equal(r.veredito, 'EXAGERADO');
-    assert.deepEqual(r.falhas, ['gemini: HTTP 429']);
+    assert.deepEqual(r.falhas, ['gemini: HTTP 429 (org-… <ak-…> over quota)']);
     const nada = await opinar('h', {}, falso);
     assert.equal(nada.modelo, null);
-    assert.equal(nada.falhas.length, 2);
+    assert.equal(nada.falhas.length, 3);
     console.log('segunda-opiniao: ok');
   });
 }
@@ -100,9 +114,12 @@ if (process.argv[2] === '--check') await check();
 else {
   let texto = '';
   for await (const pedaco of process.stdin) texto += pedaco;
-  if (!texto.trim()) { console.error('Uso: node scripts/segunda-opiniao.mjs < historia.md'); process.exit(2); }
-  const r = await opinar(texto);
-  if (!r.modelo) { console.log(`indisponível (${r.falhas.join('; ')})`); process.exit(0); }
-  console.log(`modelo: ${r.modelo}\nveredito: ${r.veredito}\nconfianca: ${r.confianca ?? '?'}\nmotivo: ${r.motivo}\nred flags: ${r.redFlags}`);
-  if (r.falhas.length) console.log(`falhas antes: ${r.falhas.join('; ')}`);
+  // Sem process.exit: no Windows ele derruba o Node com o stdin ainda fechando (assert em async.c).
+  const r = texto.trim() ? await opinar(texto) : null;
+  if (!r) { console.error('Uso: node scripts/segunda-opiniao.mjs < historia.md'); process.exitCode = 2; }
+  else if (!r.modelo) console.log(`indisponível (${r.falhas.join('; ')})`);
+  else {
+    console.log(`modelo: ${r.modelo}\nveredito: ${r.veredito}\nconfianca: ${r.confianca ?? '?'}\nmotivo: ${r.motivo}\nred flags: ${r.redFlags}`);
+    if (r.falhas.length) console.log(`falhas antes: ${r.falhas.join('; ')}`);
+  }
 }
