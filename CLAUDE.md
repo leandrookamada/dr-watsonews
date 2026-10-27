@@ -1,6 +1,6 @@
 # Dr. Watsonews
 
-Briefing diário com checagem de fatos, separado por área: `tech` (Ciência da Computação e Cybersecurity) e `politica` (Brasil e internacional).
+Briefing diário com checagem de fatos, separado por área: `tech` (Ciência da Computação e Cybersecurity), `politica` (Brasil e internacional) e `ia` (modelos, arquiteturas e pesquisa de IA).
 Inspirado no pipeline do [frank_investigator](https://github.com/akitaonrails/frank_investigator),
 mas roda 100% dentro do Claude Code (plano Pro): sem API keys, sem banco, sem servidor.
 O "consenso multi-modelo" do Frank vira consenso entre subagentes Claude com papéis diferentes.

@@ -37,6 +37,21 @@ function campo(bloco, ...nomes) {
 export function parseFeed(corpo) {
   if (/^[[{]/.test(corpo.trimStart())) {
     const d = JSON.parse(corpo);
+    // Hugging Face: papers do dia (curadoria com votos) e modelos em alta. `peso` ordena antes da data.
+    if (Array.isArray(d) && d[0]?.paper) return d.map(({ paper: p }) => ({
+      titulo: `[▲${p.upvotes ?? 0}] ${p.title}`,
+      link: `https://huggingface.co/papers/${p.id}`,
+      data: new Date(p.submittedOnDailyAt || p.publishedAt),
+      resumo: p.ai_summary || p.summary || '',
+      peso: p.upvotes ?? 0,
+    }));
+    if (Array.isArray(d) && d[0]?.modelId) return d.map(m => ({
+      titulo: `${m.id}${m.pipeline_tag ? ` [${m.pipeline_tag}]` : ''} (♥${m.likes ?? 0})`,
+      link: `https://huggingface.co/${m.id}`,
+      data: new Date(m.createdAt),
+      resumo: `${m.downloads ?? 0} downloads`,
+      peso: m.trendingScore ?? 0,
+    }));
     if (Array.isArray(d)) return d.map(a => ({
       titulo: `${a.ghsa_id}${a.cve_id ? ` / ${a.cve_id}` : ''} [${a.severity}] ${a.summary}`,
       link: a.html_url,
@@ -122,6 +137,13 @@ if (process.argv.includes('--check')) {
   const repos = parseFeed('{"total_count":1,"items":[{"full_name":"a/CVE-1-poc","stargazers_count":3,"html_url":"https://g/2","created_at":"2026-10-26T02:00:00Z","description":null}]}');
   assert.equal(repos[0].titulo, 'a/CVE-1-poc (★3)');
   assert.deepEqual(parseFeed('[]'), []);
+  const papers = parseFeed('[{"paper":{"id":"2610.1","title":"P","upvotes":42,"submittedOnDailyAt":"2026-10-26T08:00:00Z","summary":"s"}}]');
+  assert.equal(papers[0].titulo, '[▲42] P');
+  assert.equal(papers[0].link, 'https://huggingface.co/papers/2610.1');
+  assert.equal(papers[0].peso, 42);
+  const modelos = parseFeed('[{"modelId":"a/b","id":"a/b","pipeline_tag":"text-generation","likes":5,"trendingScore":9,"createdAt":"2026-10-24T00:00:00Z","downloads":10}]');
+  assert.equal(modelos[0].titulo, 'a/b [text-generation] (♥5)');
+  assert.equal(modelos[0].peso, 9);
   const f = fontesDaArea('| Fonte | Feed |\n|---|---|\n| G1 | https://g1/rss | secundária | Globo |\n| STF | sem feed |');
   assert.deepEqual(f, [{ nome: 'G1', url: 'https://g1/rss', meta: 'secundária · Globo' }]);
   console.log('coleta ok');
@@ -150,11 +172,14 @@ const resultados = await Promise.all(fontes.map(async f => {
     const itens = parseFeed(await baixar(url));
     // API do GitHub sem resultado é dia sem novidade, não falha.
     if (!itens.length) return url.startsWith('https://api.github.com/') ? { ...f, itens: [] } : { ...f, falha: 'sem itens (página sem RSS?)' };
-    const novos = itens.filter(i => i.data && !isNaN(i.data) && i.data >= corte && i.link);
+    // "janela Nd" na linha da fonte amplia a janela só para ela (ex.: modelos em alta criados na semana).
+    const dias = Number(f.meta.match(/janela (\d+)d/)?.[1]);
+    const corteFonte = dias ? Date.now() - dias * 864e5 : corte;
+    const novos = itens.filter(i => i.data && !isNaN(i.data) && i.data >= corteFonte && i.link);
     if (!novos.length && itens.every(i => !i.data || isNaN(i.data))) return { ...f, falha: 'itens sem data' };
     const filtrados = novos.filter(i => !jaVistos.has(i.link));
     removidos += novos.length - filtrados.length;
-    return { ...f, itens: filtrados.sort((a, b) => b.data - a.data).slice(0, MAX_ITENS) };
+    return { ...f, itens: filtrados.sort((a, b) => (b.peso ?? 0) - (a.peso ?? 0) || b.data - a.data).slice(0, MAX_ITENS) };
   } catch (e) {
     return { ...f, falha: e.name === 'TimeoutError' ? 'timeout' : e.message };
   }

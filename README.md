@@ -58,8 +58,11 @@ Histórias de **risco baixo** (fonte primária, 2+ grupos independentes, sem fon
 |---|---|---|
 | `tech` | Ciência da Computação e Cybersecurity | Cybersecurity, Ciência da Computação |
 | `politica` | Política do Brasil e internacional | Brasil, Internacional |
+| `ia` | IA acadêmica: modelos, arquiteturas, papers e infraestrutura | Modelos e lançamentos, Pesquisa e arquiteturas, Ferramentas e infraestrutura |
 
 A área `tech` também coleta do GitHub: advisories revisados do GitHub Advisory Database (critical e high), releases de segurança de projetos-chave (Node.js, OpenSSL, curl, Kubernetes), o GitHub Security Lab e repositórios novos de PoC de CVE (tratados só como sinal, nunca como prova de exploração).
+
+A área `ia` coleta blogs de laboratórios (OpenAI, Google DeepMind, Microsoft Research, Qwen e outros), a curadoria diária de papers do Hugging Face (ordenada por votos), os modelos em alta no Hugging Face, releases de vLLM e Transformers e newsletters técnicas. As checagens extras tratam benchmark autodeclarado, "open source" × pesos abertos, preprint sem revisão e demonstração × disponibilidade real.
 
 A área `politica` tem checagens extras: etapa institucional (comissão × plenário, liminar × plenário, denúncia × condenação), números oficiais, pesquisas eleitorais, fontes anônimas e comparação de enquadramento entre veículos de perfis diferentes.
 

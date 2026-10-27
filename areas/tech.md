@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Ciência da Computação e Cybersecurity: vulnerabilidades, incidentes, pesquisa, ferramentas, infraestrutura, IA aplicada.
+Ciência da Computação e Cybersecurity: vulnerabilidades, incidentes, pesquisa, ferramentas, infraestrutura, segurança de IA. Lançamentos, modelos e pesquisa de IA em geral ficam na área `ia`.
 Descartar: patrocinado/webinar, vaga, review de produto, listas "top 10".
 Prioridade: exploração ativa/incidente amplo > vulnerabilidade crítica com patch > pesquisa relevante > resto.
 
@@ -56,7 +56,6 @@ Feeds marcados com `bloqueia-bot` responderam 403/406 a requisições automátic
 | Fonte | Feed | Nível | Obs. |
 |---|---|---|---|
 | arXiv cs.CR | https://rss.arxiv.org/rss/cs.CR | primária | preprint: não revisado por pares; vazio sáb/dom |
-| arXiv cs.AI | https://rss.arxiv.org/rss/cs.AI | primária | preprint: não revisado por pares; vazio sáb/dom |
 | LWN.net | https://lwn.net/headlines/rss | secundária | |
 | Quanta Magazine | https://api.quantamagazine.org/feed/ | secundária | filtrar só computação |
 | MIT Technology Review | https://www.technologyreview.com/feed/ | secundária | |

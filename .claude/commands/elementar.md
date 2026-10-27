@@ -1,6 +1,6 @@
 ---
-description: Gera o briefing diário de uma área (tech, politica), com checagem de fatos
-argument-hint: "[área: tech|politica, padrão tech] [máx. de histórias, padrão 12]"
+description: Gera o briefing diário de uma área (tech, politica, ia), com checagem de fatos
+argument-hint: "[área: tech|politica|ia, padrão tech] [máx. de histórias, padrão 12]"
 ---
 
 Gere o briefing de hoje.
