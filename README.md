@@ -135,6 +135,10 @@ Com o cofre fora do projeto, libere a escrita nele para o Claude Code em `.claud
 
 Além do briefing diário, dá para pedir ao Claude Code uma pesquisa direcionada sobre um tema (por exemplo, uma CVE). Ela segue o mesmo método: frentes de Watson em paralelo para fontes primárias, exploração e ecossistema, e depois o Mycroft revisa as alegações consolidadas. O resultado vai para `<cofre>/dossies/AAAA-MM-DD-<tema>.md` e aparece na aba Dossiês do jornal.
 
+### Estudo (`/estudo`)
+
+`/estudo <tema> [foco: <aplicação>]` gera material de estudo aprofundado, não notícia: Parte I explica como o assunto funciona (byte a byte quando dá, com laboratórios reais), Parte II aplica ao foco (padrão: cybersecurity ofensiva e defensiva) e Parte III traz labs, questões com resposta recolhível, flashcards e um mapa de estudo. Frentes de subagentes Claude escrevem em paralelo; o Watson checa as afirmações incertas; o Gemini (via CLI `agy`, do Antigravity) escreve um ementário independente e depois revisa os capítulos atrás de erros e lacunas, e cada apontamento é conferido em fonte primária antes de entrar. Sai em `<cofre>/dossies/AAAA-MM-DD-estudo-<slug>.md`, com os arquivos de laboratório (sem chaves privadas) em `<cofre>/dossies/anexos/`. Sem o `agy`, a revisão externa é pulada e registrada.
+
 ### Formato das notas
 
 Cada notícia em `<cofre>/noticias/AAAA-MM-DD-<slug>.md` tem frontmatter (`titulo`, `data`, `area`, `secao`, `veredito`, `confianca`, `contestado`, `checagem`, `tags`), um resumo só com o que foi verificado, "Por que importa", links de evidência e red flags. A nota de edição do dia, em `<cofre>/edicoes/`, traz os destaques, a lista por seção e a tabela de descartados.
@@ -145,6 +149,7 @@ Cada notícia em `<cofre>/noticias/AAAA-MM-DD-<slug>.md` tem frontmatter (`titul
 CLAUDE.md                      regras do projeto
 areas/                         uma área por arquivo: escopo, checagens extras, feeds e nível
 .claude/commands/elementar.md  o pipeline (comando /elementar)
+.claude/commands/estudo.md     dossiê de estudo aprofundado (comando /estudo)
 .claude/agents/                Lestrade, Watson, Mycroft
 .claude/settings.json          permissões do projeto
 scripts/coletar.mjs            coleta dos feeds (Node, sem dependências)
