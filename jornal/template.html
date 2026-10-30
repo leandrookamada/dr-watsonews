@@ -111,6 +111,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--regra-2); padding-top: 10
     <a href="#/area/tech" data-rota="area/tech">Tech</a>
     <a href="#/area/politica" data-rota="area/politica">Política</a>
     <a href="#/area/ia" data-rota="area/ia">IA</a>
+    <a href="#/area/darkweb" data-rota="area/darkweb">Dark web</a>
     <a href="#/dossies" data-rota="dossies">Dossiês</a>
     <a href="#/tags" data-rota="tags">Tags</a>
     <a href="#/arquivo" data-rota="arquivo">Arquivo</a>
@@ -123,7 +124,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--regra-2); padding-top: 10
 <script id="dados" type="application/json">__DADOS__</script>
 <script>
 const DADOS = JSON.parse(document.getElementById('dados').textContent);
-const AREAS = { tech: 'Tech', politica: 'Política', ia: 'IA' };
+const AREAS = { tech: 'Tech', politica: 'Política', ia: 'IA', darkweb: 'Dark web' };
 const ORDEM = ['CONFIRMADO', 'PROVÁVEL', 'EXAGERADO', 'NÃO VERIFICÁVEL', 'BULLSHIT'];
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -212,7 +213,8 @@ const telas = {
     noticias.forEach(n => { if (!ultima[n.meta.area] || n.meta.data > ultima[n.meta.area]) ultima[n.meta.area] = n.meta.data; });
     const capa = noticias.filter(n => n.meta.data === ultima[n.meta.area]);
     const [lider, ...resto] = capa;
-    const eds = Object.entries(ultima).map(([a, d]) => edicoes.find(e => e.meta.area === a && e.meta.data === d)).filter(Boolean);
+    // Última edição de cada área, inclusive as de modo radar, que não têm notícias.
+    const eds = edicoes.filter((e, i) => edicoes.findIndex(x => x.meta.area === e.meta.area) === i);
     const anteriores = noticias.filter(n => !capa.includes(n)).slice(0, 8);
     return `<div class="primeira">
       <div class="principal">
@@ -238,7 +240,10 @@ const telas = {
   },
   area(a) {
     const lista = noticias.filter(n => n.meta.area === a);
-    return telas.lista(esc(nomeArea(a)), lista, lista.length ? `<div style="margin-bottom:12px">${nuvem(lista)}</div>` : '');
+    const eds = edicoes.filter(e => e.meta.area === a).slice(0, 14);
+    const extra = (eds.length ? `<div class="rodape-cartao" style="margin-bottom:12px">${eds.map(e => `<a class="tag" href="#/e/${encodeURIComponent(e.id)}">Edição de ${esc(dataBR(e.meta.data))}</a>`).join(' · ')}</div>` : '')
+      + (lista.length ? `<div style="margin-bottom:12px">${nuvem(lista)}</div>` : '');
+    return telas.lista(esc(nomeArea(a)), lista, extra);
   },
   tag: t => telas.lista('#' + esc(t), noticias.filter(n => (n.meta.tags || []).includes(t))),
   data: d => telas.lista('Notícias de ' + esc(dataBR(d)), noticias.filter(n => n.meta.data === d)),

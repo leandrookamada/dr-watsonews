@@ -109,14 +109,17 @@ async function baixar(url) {
   try { return new TextDecoder(charset).decode(bytes); } catch { return new TextDecoder('utf-8').decode(bytes); }
 }
 
+// Notícias e edições: área em modo radar só grava edição, e os links dela também contam como já vistos.
 function linksNoCofre(dias) {
-  const dir = join(COFRE, 'noticias');
-  if (!existsSync(dir)) return new Set();
   const corte = new Date(Date.now() - dias * 864e5).toISOString().slice(0, 10);
-  return new Set(readdirSync(dir)
+  return new Set(['noticias', 'edicoes'].map(p => join(COFRE, p)).filter(existsSync).flatMap(dir => readdirSync(dir)
     .filter(f => f.endsWith('.md') && f.slice(0, 10) >= corte)
-    .flatMap(f => readFileSync(join(dir, f), 'utf8').match(/https?:\/\/[^\s)\]>]+/g) || []));
+    .flatMap(f => readFileSync(join(dir, f), 'utf8').match(/https?:\/\/[^\s)\]>]+/g) || [])));
 }
+
+// "Execução: só nuvem" no arquivo da área: a coleta só roda com WATSON_NUVEM=1 (variável do ambiente em nuvem),
+// para que os acessos dessa área nunca saiam da máquina local.
+export const soNuvem = (md, env) => /^Execução:\s*só nuvem/mi.test(md) && !env.WATSON_NUVEM;
 
 const fmtData = d => d.toISOString().slice(0, 16).replace('T', ' ');
 
@@ -146,6 +149,9 @@ if (process.argv.includes('--check')) {
   assert.equal(modelos[0].peso, 9);
   const f = fontesDaArea('| Fonte | Feed |\n|---|---|\n| G1 | https://g1/rss | secundária | Globo |\n| STF | sem feed |');
   assert.deepEqual(f, [{ nome: 'G1', url: 'https://g1/rss', meta: 'secundária · Globo' }]);
+  assert.equal(soNuvem('# Área\n\nModo: radar\nExecução: só nuvem\n', {}), true);
+  assert.equal(soNuvem('Execução: só nuvem', { WATSON_NUVEM: '1' }), false);
+  assert.equal(soNuvem('# Área: tech', {}), false);
   console.log('coleta ok');
   process.exit(0);
 }
@@ -158,7 +164,12 @@ if (!area || !existsSync(arqArea)) {
   process.exit(1);
 }
 
-const fontes = fontesDaArea(readFileSync(arqArea, 'utf8'));
+const md = readFileSync(arqArea, 'utf8');
+if (soNuvem(md, process.env)) {
+  console.error(`A área ${area} roda só em nuvem (defina WATSON_NUVEM=1 no ambiente em nuvem). Nada foi baixado.`);
+  process.exit(3);
+}
+const fontes = fontesDaArea(md);
 const corte = Date.now() - horas * 36e5;
 const jaVistos = linksNoCofre(7);
 let removidos = 0;
@@ -179,7 +190,9 @@ const resultados = await Promise.all(fontes.map(async f => {
     if (!novos.length && itens.every(i => !i.data || isNaN(i.data))) return { ...f, falha: 'itens sem data' };
     const filtrados = novos.filter(i => !jaVistos.has(i.link));
     removidos += novos.length - filtrados.length;
-    return { ...f, itens: filtrados.sort((a, b) => (b.peso ?? 0) - (a.peso ?? 0) || b.data - a.data).slice(0, MAX_ITENS) };
+    // "max N" na linha da fonte troca o limite de itens (ex.: rastreadores de leak site, contados no radar).
+    const max = Number(f.meta.match(/max (\d+)/)?.[1]) || MAX_ITENS;
+    return { ...f, itens: filtrados.sort((a, b) => (b.peso ?? 0) - (a.peso ?? 0) || b.data - a.data).slice(0, max) };
   } catch (e) {
     return { ...f, falha: e.name === 'TimeoutError' ? 'timeout' : e.message };
   }

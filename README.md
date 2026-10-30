@@ -60,12 +60,15 @@ Histórias de **risco baixo** (fonte primária, 2+ grupos independentes, sem fon
 | `tech` | Ciência da Computação e Cybersecurity | Cybersecurity, Ciência da Computação |
 | `politica` | Política do Brasil e internacional | Brasil, Internacional |
 | `ia` | IA acadêmica: modelos, arquiteturas, papers e infraestrutura | Modelos e lançamentos, Pesquisa e arquiteturas, Ferramentas e infraestrutura |
+| `darkweb` | Radar do submundo do cibercrime (sem checagem) | Ransomware e extorsão, Vazamentos e venda de acesso, Fóruns e mercados, Ferramentas e TTPs |
 
 A área `tech` também coleta do GitHub: advisories revisados do GitHub Advisory Database (critical e high), releases de segurança de projetos-chave (Node.js, OpenSSL, curl, Kubernetes), o GitHub Security Lab e repositórios novos de PoC de CVE (tratados só como sinal, nunca como prova de exploração).
 
 A área `ia` coleta blogs de laboratórios (OpenAI, Google DeepMind, Microsoft Research, Qwen e outros), a curadoria diária de papers do Hugging Face (ordenada por votos), os modelos em alta no Hugging Face, releases de vLLM e Transformers e newsletters técnicas. As checagens extras tratam benchmark autodeclarado, "open source" × pesos abertos, preprint sem revisão e demonstração × disponibilidade real.
 
 A área `politica` tem checagens extras: etapa institucional (comissão × plenário, liminar × plenário, denúncia × condenação), números oficiais, pesquisas eleitorais, fontes anônimas e comparação de enquadramento entre veículos de perfis diferentes.
+
+A área `darkweb` está em **modo radar**: mostra o que está acontecendo no submundo, sem checagem de fatos. Não usa Tor nem crawler: lê rastreadores públicos de leak sites (ransomware.live, RansomLook), anúncios de vazamento (Dark Web Informer, DataBreaches.net) e blogs de empresas de inteligência de ameaças. Pula Watson, Mycroft e a opinião externa, e grava só uma nota de edição por dia, com tudo atribuído ("o grupo X alega", "segundo a empresa Y"). As vítimas aparecem só em números agregados, sem nome, e indicadores vão desarmados. O único acesso à rede é a coleta dos feeds; no modo radar, nenhum agente abre os links dos itens. Para tirar até esses acessos da sua máquina, marque a área com `Execução: só nuvem` (ver "Rodar em nuvem" abaixo).
 
 **Para criar uma área nova**, adicione `areas/<nome>.md` com as mesmas seções dos arquivos existentes: Escopo, Seções do briefing, Tags de assunto, Checagens extras e Fontes (tabelas com feed e nível de autoridade). Depois é só rodar `/elementar <nome>`.
 
@@ -131,6 +134,16 @@ Com o cofre fora do projeto, libere a escrita nele para o Claude Code em `.claud
 }
 ```
 
+### Rodar em nuvem
+
+Uma área marcada com a linha `Execução: só nuvem` no topo do seu arquivo roda numa sessão do [Claude Code na web](https://claude.ai/code), não na sua máquina. Assim a coleta e a leitura das fontes saem do ambiente em nuvem, e o que chega até você é só o texto da edição.
+
+1. Crie um ambiente em nuvem para este repositório com a variável `WATSON_NUVEM=1` e um script de setup que clone o repositório do seu cofre para `cofre/` (pasta fora do Git deste projeto). Exemplo: `git clone https://github.com/<você>/<seu-cofre>.git cofre`.
+2. Na sessão em nuvem, rode `/elementar <área>`. Sem `config.local.json`, o cofre é `cofre/`.
+3. Ao fim, commite e faça push da nota nova dentro de `cofre/`. Na sua máquina, `git pull` no cofre traz a edição. Rode `node scripts/jornal.mjs` para atualizar o jornal.
+
+Na máquina local, a coleta de uma área assim se recusa a rodar e não baixa nada.
+
 ### Dossiês
 
 Além do briefing diário, dá para pedir ao Claude Code uma pesquisa direcionada sobre um tema (por exemplo, uma CVE). Ela segue o mesmo método: frentes de Watson em paralelo para fontes primárias, exploração e ecossistema, e depois o Mycroft revisa as alegações consolidadas. O resultado vai para `<cofre>/dossies/AAAA-MM-DD-<tema>.md` e aparece na aba Dossiês do jornal.
@@ -174,6 +187,8 @@ config.local.json              caminho do cofre na sua máquina (fora do Git)
 Todo conteúdo buscado na web (artigos, feeds, comentários) é tratado como **dado, não instrução**. Páginas que tentam dar ordens aos agentes são ignoradas e registradas como red flag da fonte.
 
 As permissões em `.claude/settings.json` são restritas a leitura da web, leitura de arquivos, escrita no cofre e execução dos scripts do projeto. As chaves do Gemini, do Groq e do Kimi ficam só em variáveis de ambiente, nunca no repositório. Os agentes consultam o GitHub só pela API pública, via WebFetch e sem credenciais: nada do pipeline pode escrever na sua conta. Repositórios de PoC são lidos (README e descrição), nunca executados.
+
+Na área `darkweb`, ninguém acessa Tor, endereços `.onion`, Telegram de grupos criminosos, sites de paste nem links de download de vazamento ou de malware: só o que fontes públicas já publicaram. Nomes de vítimas ficam de fora, e indicadores são desarmados (`hxxp`, `[.]`).
 
 Durante uma execução, o pipeline só escreve dentro do cofre (e, pelos scripts, em `coleta/` e `jornal/`).
 

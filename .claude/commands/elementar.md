@@ -1,6 +1,6 @@
 ---
-description: Gera o briefing diário de uma área (tech, politica, ia), com checagem de fatos
-argument-hint: "[área: tech|politica|ia, padrão tech] [máx. de histórias, padrão 12]"
+description: Gera o briefing diário de uma área (tech, politica, ia), com checagem de fatos, ou o radar darkweb (sem checagem)
+argument-hint: "[área: tech|politica|ia|darkweb, padrão tech] [máx. de histórias, padrão 12]"
 ---
 
 Gere o briefing de hoje.
@@ -9,6 +9,8 @@ Gere o briefing de hoje.
 - Limite de histórias verificadas: `$1` (se vazio, 12).
 
 Leia `CLAUDE.md` e o arquivo da área antes de começar. O **cofre** é a pasta do campo `cofre` em `config.local.json`; se esse arquivo não existir, é `cofre/` no projeto. Abaixo, `<cofre>` é esse caminho. Siga as etapas na ordem.
+
+**Área com `Modo: radar`** (ex.: `darkweb`): é um panorama sem checagem. Na etapa 1, rode a coleta com janela de 24h (`node scripts/coletar.mjs <área> 24`); se ela recusar a execução ("só em nuvem"), pare e repasse a mensagem, sem tentar buscar as fontes de outro jeito. Chame o Lestrade normalmente: as instruções do radar estão no arquivo da área. **Pule as etapas 2 e 3** (sem Watson, Mycroft, opinião externa nem veredito). Na etapa 4, grave só a nota de edição, no formato da seção "Edição do radar" do arquivo da área, e siga as "Regras do radar" dele. Depois, etapas 5 e 6.
 
 ## 1. Coleta e triagem — script + Lestrade
 
